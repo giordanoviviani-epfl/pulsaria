@@ -110,6 +110,10 @@ def configure_logging() -> None:
     """Read and set logging configuration from logging_config.yaml."""
     logging_dir = Path(os.path.realpath(__file__)).parent
     config_file = logging_dir / "logging_config.yaml"
+
+    save_log_dir = logging_dir.parent / "logs"
+    save_log_dir.mkdir(exist_ok=True)
+
     with config_file.open() as f_in:
         config = yaml.safe_load(f_in)
     logging.config.dictConfig(config)
