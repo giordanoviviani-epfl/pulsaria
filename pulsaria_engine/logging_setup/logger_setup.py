@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import override
 
 import yaml
+from path_config import pulsaria_path
 
 LOG_RECORD_BUILTIN_ATTRS = {
     "args",
@@ -111,11 +112,16 @@ def configure_logging() -> None:
     logging_dir = Path(os.path.realpath(__file__)).parent
     config_file = logging_dir / "logging_config.yaml"
 
-    save_log_dir = logging_dir.parent / "logs"
+    save_log_dir = logging_dir.parent.parent / "logs"
     save_log_dir.mkdir(exist_ok=True)
 
     with config_file.open() as f_in:
         config = yaml.safe_load(f_in)
+
+    for handler in config["handlers"].values():
+        if handler.get("filename"):
+            handler["filename"] = str(pulsaria_path.root / handler["filename"])
+
     logging.config.dictConfig(config)
     queue_handler = logging.getHandlerByName("queue_handler")
     if queue_handler is not None:

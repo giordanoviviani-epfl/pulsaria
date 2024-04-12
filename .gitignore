@@ -1,5 +1,7 @@
 # Specific to Pulsaria
 logs/*
+data/*
+!data/README.md
 playground.py
 
 # Byte-compiled / optimized / DLL files
