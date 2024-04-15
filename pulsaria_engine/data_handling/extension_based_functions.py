@@ -8,6 +8,7 @@ import logging
 from pathlib import Path
 
 import pandas as pd
+import yaml
 from astropy.io import fits
 from astropy.table import Table
 
@@ -113,3 +114,36 @@ def fits_get_dataframe(
 
     logger.info("Successfully read dataframe from: %s", file)
     return dataframe
+
+
+def yaml_get_data(file: str | Path) -> dict:
+    """Read data from a yaml file.
+
+    Parameters
+    ----------
+    file : str or Path
+        Path to the yaml file.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the data from the yaml file.
+
+    """
+    _check_file_exists(file)
+
+    with Path(file).open("r") as f:
+        try:
+            data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            logger.exception(
+                "Error reading data from: %s",
+                file,
+                extra={
+                    "exception": e,
+                },
+            )
+            raise
+
+    logger.info("Successfully read data from: %s", file)
+    return data
