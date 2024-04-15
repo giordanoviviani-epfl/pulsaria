@@ -40,6 +40,11 @@ LOG_RECORD_BUILTIN_ATTRS = {
 }
 
 
+DISABLED_LOGGERS = [
+    "matplotlib",
+]
+
+
 class JSONFormatter(logging.Formatter):
     """JSON log formatter."""
 
@@ -127,3 +132,6 @@ def configure_logging() -> None:
     if queue_handler is not None:
         queue_handler.listener.start()
         atexit.register(queue_handler.listener.stop)
+
+    for logger_name in DISABLED_LOGGERS:
+        logging.getLogger(logger_name).setLevel(logging.WARNING)

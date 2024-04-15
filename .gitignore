@@ -3,6 +3,7 @@ logs/*
 data/*
 !data/README.md
 playground.py
+playground.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

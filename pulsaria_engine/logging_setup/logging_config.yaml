@@ -10,7 +10,7 @@ formatters:
     format: "[%(levelname)s|%(module)s|%(lineno)d]: %(message)s"
 
   dated:
-    format: "[%(levelname)s|%(module)s|%(lineno)d] %(asctime)s: %(message)s"
+    format: "[%(levelname)s|%(module)s|%(lineno)d] %(asctime)s: %(message)s (%(name)s)"
     datefmt: "%Y-%m-%dT%H:%M:%S%z"
 
   json:
