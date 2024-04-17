@@ -97,9 +97,11 @@ def fits_get_dataframe(
         if columns is None:
             columns = hdul[hdu].columns.names
         try:
-            dataframe = pd.DataFrame(hdul[hdu].data, columns=columns)
+            table = Table(hdul[hdu].data)
+            table.keep_columns(columns)
+            dataframe = table.to_pandas()
         except ValueError as e:
-            table = Table.read(hdul[hdu].data)
+            table = Table(hdul[hdu].data)
             for col in table.columns:
                 if len(table[col].shape) > 1:
                     logger.critical("Column %s has shape %d", col, table[col].shape)
