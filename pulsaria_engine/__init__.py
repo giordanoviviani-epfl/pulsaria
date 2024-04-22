@@ -4,13 +4,31 @@ import logging
 import sys
 from pathlib import Path
 
+from IPython import get_ipython
+
 sys.path.append(str(Path(__file__).parent))
 
-import data_handling
+import measurements
 from logging_setup import configure_logging
+from measurements import MeasurementsReader
+
+
+def is_notebook() -> bool:
+    """Check if the code is running in a Jupyter notebook."""
+    shell = get_ipython().__class__.__name__
+    if shell == "ZMQInteractiveShell":
+        return True  # Jupyter notebook or qtconsole
+    if shell == "TerminalInteractiveShell":
+        return False  # Terminal running IPython
+    return False  # Other type (?)
+
 
 logger = logging.getLogger("pulsaria_engine")  # __name__ is a common choice
 configure_logging()
 
-
-__all__ = ["logger", "data_handling"]
+# Check the environment
+if is_notebook():
+    logger.info("Running in a Jupyter notebook.")
+else:
+    logger.info("Running in a Python script or shell.")
+__all__ = ["logger", "measurements", "MeasurementsReader"]
