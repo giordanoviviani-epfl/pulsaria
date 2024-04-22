@@ -69,8 +69,6 @@ handlers:
   queue_handler:
     class: logging.handlers.QueueHandler
     handlers:
-    - console
-    - console_err
     - file
     - file_json
     respect_handler_level: true
@@ -81,3 +79,5 @@ loggers:
     level: DEBUG
     handlers:
     - queue_handler
+    - console
+    - console_err
