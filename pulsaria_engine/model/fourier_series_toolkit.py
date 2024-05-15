@@ -22,11 +22,11 @@ FOURIER_SERIES_PARAMETRIZATIONS = [
 
 
 def fourier_series(
-    coeff: npt.ArrayLike,
-    phase: npt.ArrayLike,
+    coeff: npt.NDArray,
+    phase: float | npt.NDArray,
     parametrization: str | None = None,
     n_harmonics: int | None = None,
-) -> npt.ArrayLike:
+) -> float | npt.NDArray:
     """Compute a Fourier series.
 
     Given the coefficients of the Fourier series and the phase, compute the
@@ -71,7 +71,7 @@ def fourier_series(
     parametrization = parametrization if parametrization else "cos-sin"
     _check_parametrization(parametrization)
 
-    fs_values = 0
+    fs_values: float | npt.NDArray = 0
     iter_coeff = enumerate(batched(coeff_trimmed, 2), 1)
 
     match parametrization:
@@ -92,7 +92,7 @@ def fourier_series(
                 factor = 2 * np.pi * n
                 fs_values += An * np.cos(factor * phase + phin)
         case "exp":
-            for n, pos_coeff, neg_coeff in iter_coeff:
+            for n, (pos_coeff, neg_coeff) in iter_coeff:
                 complex_factor = 1j * 2 * np.pi * n
                 fs_values += pos_coeff * np.exp(complex_factor * phase)
                 fs_values += neg_coeff * np.exp(-complex_factor * phase)
@@ -220,7 +220,7 @@ def change_parametrization_fs_cov_matrix(
     _check_parametrization(old_parametrization)
     _check_parametrization(new_parametrization)
 
-    tuple_permutations = tuple(old_parametrization, new_parametrization)
+    tuple_permutations = (old_parametrization, new_parametrization)
     if tuple_permutations in permutations(["cos-sin", "sin-cos"]):
         p = _permutation_matrix_swap_adjacent(len(cov_matrix))
         return p @ cov_matrix @ p.T
@@ -262,9 +262,9 @@ def formula_fourier_series(
     Examples
     --------
     >>> formula_fourier_series("cos-sin", 3)
-    '$\\\sum_{n=1}^3 (a_n \\\cos(2\\\pi n x) + b_n \\\sin(2\\\pi n x))$'
+    '$\\\\sum_{n=1}^3 (a_n \\\\cos(2\\\\pi n x) + b_n \\\\sin(2\\\\pi n x))$'
 
-    """  # noqa: D301, W605
+    """  # noqa: D301
     match parametrization:
         case "cos-sin":
             return (
@@ -281,14 +281,14 @@ def formula_fourier_series(
         case "amp-phase+":
             return rf"$\sum_{{n=1}}^{n_harmonics} A_n \cos(2\pi n x + \phi_n)$"
         case "exp":
-            return rf"$\sum_{{n={-n_harmonics}}}^{n_harmonics} C_n e^{{i2\pi n x}}$"
+            return rf"$\sum_{{n=-{n_harmonics}}}^{n_harmonics} C_n e^{{i2\pi n x}}$"
         case _:
             msg = "Parametrization %s not implemented."
             raise NotImplementedError(msg % parametrization)
 
 
 # Utility functions -------------------------------------------------------------------
-def _check_coefficients_even(coeff: np.array) -> None:
+def _check_coefficients_even(coeff: npt.NDArray) -> None:
     """Check if the number of coefficients is even.
 
     Parameters
@@ -308,7 +308,7 @@ def _check_coefficients_even(coeff: np.array) -> None:
         raise ValueError(msg)
 
 
-def _check_harmonics_fourier_series(coeff: np.array, n_harmonics: int) -> int:
+def _check_harmonics_fourier_series(coeff: npt.NDArray, n_harmonics: int | None) -> int:
     if n_harmonics:
         n_harmonics = int(n_harmonics)
         if n_harmonics < 1:
@@ -352,9 +352,9 @@ def _permutation_matrix_swap_adjacent(n: int) -> np.ndarray:
 
 # Parametrization functions -----------------------------------------------------------
 def _switch_cos_sin_and_sin_cos(
-    coeff: npt.ArrayLike,
-    coeff_err: npt.ArrayLike,
-) -> tuple[npt.ArrayLike, npt.ArrayLike]:
+    coeff: npt.NDArray,
+    coeff_err: npt.NDArray,
+) -> tuple[npt.NDArray, npt.NDArray]:
     """Switch the coefficients from cos-sin to sin-cos form or viceversa.
 
     The function simply swaps the adjacent coefficients of the Fourier series
@@ -409,10 +409,10 @@ def _switch_cos_sin_and_sin_cos(
 
 
 def _change_cos_sin_to_amp_phase(
-    coeff: npt.ArrayLike,
-    coeff_err: npt.ArrayLike,
-    cov_matrix: np.ndarray | None = None,
-) -> tuple[npt.ArrayLike, npt.ArrayLike]:
+    coeff: npt.NDArray,
+    coeff_err: npt.NDArray,
+    cov_matrix: npt.NDArray | None = None,
+) -> tuple[npt.NDArray, npt.NDArray]:
     """Change FS from cos-sin to amp-phase form.
 
     Change the parametrization of the Fourier series coefficients from
@@ -462,10 +462,10 @@ def _change_cos_sin_to_amp_phase(
 
 
 def _change_amp_phase_to_cos_sin(
-    coeff: np.array,
-    coeff_err: np.array,
+    coeff: npt.NDArray,
+    coeff_err: npt.NDArray,
     cov_matrix: np.ndarray | None = None,
-) -> tuple[npt.ArrayLike, npt.ArrayLike]:
+) -> tuple[npt.NDArray, npt.NDArray]:
     """Change FS from amp-phase to cos-sin form.
 
     Change the parametrization of the Fourier series coefficients from
@@ -513,10 +513,10 @@ def _change_amp_phase_to_cos_sin(
 
 
 def _change_cos_sin_to_amp_phase_plus(
-    coeff: npt.ArrayLike,
-    coeff_err: npt.ArrayLike,
-    cov_matrix: np.ndarray | None = None,
-) -> tuple[npt.ArrayLike, npt.ArrayLike]:
+    coeff: npt.NDArray,
+    coeff_err: npt.NDArray,
+    cov_matrix: npt.NDArray | None = None,
+) -> tuple[npt.NDArray, npt.NDArray]:
     """Change FS from cos-sin to amp-phase (with +) form.
 
     Change the parametrization of the Fourier series coefficients from
@@ -556,10 +556,10 @@ def _change_cos_sin_to_amp_phase_plus(
 
 
 def _change_amp_phase_plus_to_cos_sin(
-    coeff: npt.ArrayLike,
-    coeff_err: npt.ArrayLike,
-    cov_matrix: np.ndarray | None = None,
-) -> tuple[npt.ArrayLike, npt.ArrayLike]:
+    coeff: npt.NDArray,
+    coeff_err: npt.NDArray,
+    cov_matrix: npt.NDArray | None = None,
+) -> tuple[npt.NDArray, npt.NDArray]:
     """Change FS from cos-sin to amp-phase (with +) form.
 
     Change the parametrization of the Fourier series coefficients from
@@ -597,9 +597,9 @@ def _change_amp_phase_plus_to_cos_sin(
 
 
 def _change_cos_sin_to_exp(
-    coeff: npt.ArrayLike,
-    coeff_err: npt.ArrayLike,
-) -> tuple[npt.ArrayLike, npt.ArrayLike]:
+    coeff: npt.NDArray,
+    coeff_err: npt.NDArray,
+) -> tuple[npt.NDArray, npt.NDArray]:
     """Change FS from cos-sin to exp form.
 
     Change the parametrization of the Fourier series coefficients from
@@ -656,9 +656,9 @@ def _change_cos_sin_to_exp(
 
 
 def _change_exp_to_cos_sin(
-    coeff: npt.ArrayLike,
-    coeff_err: npt.ArrayLike,
-) -> tuple[npt.ArrayLike, npt.ArrayLike]:
+    coeff: npt.NDArray,
+    coeff_err: npt.NDArray,
+) -> tuple[npt.NDArray, npt.NDArray]:
     """Change FS from exp to cos-sin form.
 
     Change the parametrization of the Fourier series coefficients from
