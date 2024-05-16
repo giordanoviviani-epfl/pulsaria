@@ -1,9 +1,10 @@
 """Module for configuration utilities."""
 
 from collections.abc import Callable
+from types import ModuleType
 
 
-def resolve(name: str) -> Callable:
+def resolve(name: str) -> ModuleType | type | Callable | object:
     """Resolve a dotted name to a global object.
 
     Function is taken by the logging module:
@@ -11,6 +12,7 @@ def resolve(name: str) -> Callable:
     """
     split_name = name.split(".")
     used = split_name.pop(0)
+    found = None
     try:
         found = __import__(used)
         for n in split_name:

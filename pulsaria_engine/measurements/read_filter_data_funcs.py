@@ -13,7 +13,9 @@ columns:dataframe, etc...).
 import logging
 import operator
 from pathlib import Path
+from typing import Protocol, runtime_checkable
 
+import numpy.typing as npt
 import pandas as pd
 import yaml
 from astropy.io import fits
@@ -44,13 +46,18 @@ def _check_file_exists(file: str | Path) -> None:
         raise FileNotFoundError(message)
 
 
-def fits_get_primary_header(file: str | Path) -> dict:
+def fits_get_header(
+    file: str | Path,
+    hdu: int = 0,
+) -> dict:
     """Get the primary header of a fits file.
 
     Parameters
     ----------
     file : str or Path
         Path to the fits file.
+    hdu : int
+        HDU number to read.
 
     Returns
     -------
@@ -62,7 +69,8 @@ def fits_get_primary_header(file: str | Path) -> dict:
 
     try:
         with fits.open(file) as hdul:
-            header = dict(hdul[0].header)
+            base_hdu: BaseHDU = hdul[hdu]  # type: ignore[attr-defined]
+            header = dict(base_hdu.header)
     except Exception as e:
         logger.exception(
             "Error reading primary header from: %s",
@@ -102,25 +110,33 @@ def fits_get_dataframe(
     _check_file_exists(file)
 
     with fits.open(file) as hdul:
-        if columns is None:
-            columns = hdul[hdu].columns.names
-        try:
-            table = Table(hdul[hdu].data)
-            table.keep_columns(columns)
+        base_hdu: BaseHDU = hdul[hdu]  # type: ignore[attr-defined]
+
+        if isinstance(base_hdu, fits.PrimaryHDU):
+            if columns is not None:
+                logger.warning("Columns argument is ignored for PrimaryHDU.")
+            table = Table(base_hdu.data)
             dataframe = table.to_pandas()
-        except ValueError as e:
-            table = Table(hdul[hdu].data)
-            for col in table.columns:
-                if len(table[col].shape) > 1:
-                    logger.critical("Column %s has shape %d", col, table[col].shape)
-            logger.exception(
-                "Error reading data from: %s",
-                file,
-                extra={
-                    "exception": e,
-                },
-            )
-            raise
+        else:
+            if columns is None:
+                columns = base_hdu.columns.names  # type: ignore[attr-defined]
+            try:
+                table = Table(base_hdu.data)
+                table.keep_columns(columns)
+                dataframe = table.to_pandas()
+            except ValueError as e:
+                table = Table(base_hdu.data)
+                for col in table.columns:
+                    if len(table[col].shape) > 1:  # type: ignore[attr-defined]
+                        logger.critical("Column %s has shape %d", col, table[col].shape)  # type: ignore[attr-defined]
+                logger.exception(
+                    "Error reading data from: %s",
+                    file,
+                    extra={
+                        "exception": e,
+                    },
+                )
+                raise
 
     logger.info("Successfully read dataframe from: %s", file)
     return dataframe
@@ -266,3 +282,12 @@ def filter_from_queries(
             len(data) - len(filtered_data),
         )
     return filtered_data
+
+
+# Protocols ----------------------------------------------------------------------------
+@runtime_checkable
+class BaseHDU(Protocol):
+    """Protocol for the HDU class in astropy.io.fits."""
+
+    header: dict
+    data: npt.NDArray | fits.FITS_rec | Table | None

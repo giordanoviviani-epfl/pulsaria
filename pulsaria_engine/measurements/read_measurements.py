@@ -5,6 +5,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 import pulsaria_engine.config_utils as conf_util
@@ -76,10 +77,17 @@ class MeasurementsReader:
 
         """
         multiple_targets = False
+        header_all: dict[str, Any] = {}
+        data_all: pd.DataFrame = pd.DataFrame()
         for i, measurements_elem in enumerate(self.measurements_config):
             dataset, dataset_config = next(iter(measurements_elem.items()))
             logger.info("Reading measurements from dataset: %s", dataset)
             reading_function = conf_util.resolve(dataset_config.get("reading_function"))
+            if not callable(reading_function):
+                message = "The reading function is not callable."
+                logger.error(message)
+                raise TypeError(message)
+
             reading_config = {
                 k: v for k, v in dataset_config.items() if k != "reading_function"
             }
@@ -88,6 +96,7 @@ class MeasurementsReader:
                 reading_function,
                 **reading_config,
             )
+
             if i == 0:
                 header_all, data_all = header, data
             elif multiple_targets:
@@ -114,7 +123,7 @@ def read_target_veloce_dr1_rv(
     columns: list[str] | None = None,
     header_filters: dict | None = None,
     filters: dict | None = None,
-) -> tuple[dict, pd.DataFrame]:
+) -> tuple[dict[str, Any], pd.DataFrame]:
     """Read the RV data for a target from the Veloce DR1 dataset.
 
     Parameters
@@ -149,7 +158,7 @@ def read_target_veloce_dr1_rv(
     rename_columns = {key: key.lower() for key in all_columns}
 
     # HEADER
-    header = rfdf.fits_get_primary_header(file)
+    header = rfdf.fits_get_header(file)
     # Filter target based on header keys
     if not rfdf.filter_from_header(header, header_filters):
         return {}, pd.DataFrame()
@@ -163,6 +172,7 @@ def read_target_veloce_dr1_rv(
     rename_data = data.rename(columns=rename_columns)
     # Filter the data based on the filters
     filtered_data = rfdf.filter_from_queries(rename_data, filters)
+    filtered_data = filtered_data if filtered_data is not None else pd.DataFrame()
     if not filtered_data.empty:
         filtered_data["target"] = target
         filtered_data["reference"] = reference
@@ -176,10 +186,10 @@ def read_target_veloce_dr1_rv(
 
 # General/Multiple targets functions ---------------------------------------------------
 def read_targets_measurements_general(
-    target: str | list,
-    read_target_func: Callable[[Any], tuple[dict, pd.DataFrame]],
+    target: str | list | set | np.ndarray,
+    read_target_func: Callable[[Any], tuple[dict[str, Any], pd.DataFrame]],
     **kwargs: dict[str, Any],
-) -> tuple[dict, pd.DataFrame, bool]:
+) -> tuple[dict[str, Any] | dict[str, dict[Any, Any]], pd.DataFrame, bool]:
     """Read the measurements of a target or a list of targets.
 
     This function generalizes the inputted :function:`read_target_func` so that
@@ -211,13 +221,15 @@ def read_targets_measurements_general(
         header, data = read_target_func(target, **kwargs)
         return header, data, multiple_targets
 
-    if not isinstance(target, list | set):
-        msg = f"Invalid type for target (valid: str|list|set): {type(target)}."
+    if not isinstance(target, list | set | np.ndarray):
+        msg = (
+            f"Invalid type for target (valid: str|list|set|np.ndarray): {type(target)}."
+        )
         logger.error(msg)
         raise TypeError(msg)
 
     multiple_targets = True
-    multiple_header, multiple_data = {}, [pd.DataFrame()]
+    multiple_header, multiple_data = {}, []
     # Loop over the targets
     for single_target in target:
         header_target, data_target = read_target_func(single_target, **kwargs)
