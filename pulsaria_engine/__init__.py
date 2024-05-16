@@ -4,13 +4,15 @@ import logging
 import sys
 from pathlib import Path
 
-from IPython import get_ipython
+from IPython.core.getipython import get_ipython
 
 sys.path.append(str(Path(__file__).parent))
 
 import measurements
+import model
 from logging_setup import configure_logging
 from measurements import MeasurementsReader
+from model import FitModel, FitModelFactory, FourierSeries
 
 
 def is_notebook() -> bool:
@@ -31,4 +33,12 @@ if is_notebook():
     logger.info("Running in a Jupyter notebook.")
 else:
     logger.info("Running in a Python script or shell.")
-__all__ = ["logger", "measurements", "MeasurementsReader"]
+__all__ = [
+    "logger",
+    "measurements",
+    "MeasurementsReader",
+    "model",
+    "FourierSeries",
+    "FitModel",
+    "FitModelFactory",
+]
