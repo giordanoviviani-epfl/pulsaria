@@ -22,11 +22,11 @@ FOURIER_SERIES_PARAMETRIZATIONS = [
 
 
 def fourier_series(
-    coeff: npt.NDArray,
-    phase: float | npt.NDArray,
+    coeff: npt.NDArray[np.float64],
+    phase: float | npt.NDArray[np.float64],
     parametrization: str | None = None,
     n_harmonics: int | None = None,
-) -> float | npt.NDArray:
+) -> float | npt.NDArray[np.float64]:
     """Compute a Fourier series.
 
     Given the coefficients of the Fourier series and the phase, compute the
@@ -34,9 +34,9 @@ def fourier_series(
 
     Parameters
     ----------
-    coeff : np.array
+    coeff : npt.NDArray[np.float64]
         Coefficients of the Fourier series.
-    phase : float or np.array
+    phase : float or npt.NDArray[np.float64]
         Phase at which compute the Fourier series.
     parametrization : str or None
         Parametrization/Form of the Fourier series coefficients (:param:`coeff`)
@@ -49,7 +49,7 @@ def fourier_series(
 
     Returns
     -------
-    float or np.array
+    float or npt.NDArray[np.float64]
         Value of the Fourier series.
 
     Raises
@@ -66,7 +66,7 @@ def fourier_series(
     """
     _check_coefficients_even(coeff)
     n_harmonics = _check_harmonics_fourier_series(coeff, n_harmonics)
-    coeff_trimmed: npt.ArrayLike = coeff[: 2 * n_harmonics].copy()
+    coeff_trimmed: npt.NDArray[np.float64] = coeff[: 2 * n_harmonics].copy()
 
     parametrization = parametrization if parametrization else "cos-sin"
     _check_parametrization(parametrization)
@@ -109,32 +109,32 @@ def fourier_series(
 
 
 def change_parametrization_fs_coeff(
-    coeff: npt.ArrayLike,
-    coeff_errors: npt.ArrayLike,
+    coeff: npt.NDArray[np.float64],
+    coeff_errors: npt.NDArray[np.float64],
     old_parametrization: str,
     new_parametrization: str,
     cov_matrix: np.ndarray | None = None,
-) -> tuple[npt.ArrayLike, npt.ArrayLike]:
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Change the parametrization of the Fourier series coefficients.
 
     Parameters
     ----------
-    coeff : np.array
+    coeff : npt.NDArray[np.float64]
         Coefficients of the Fourier series.
-    coeff_errors : np.array
+    coeff_errors : npt.NDArray[np.float64]
         Relative uncertainties of the Fourier series coefficients.
     old_parametrization : str
         Old parametrization/form of the Fourier series coefficients.
     new_parametrization : str
         New parametrization/form of the Fourier series coefficients.
-    cov_matrix : np.array or None
+    cov_matrix : npt.NDArray[np.float64] or None
         Covariance matrix of the Fourier series coefficients. Default is None.
 
     Returns
     -------
-    coeff: npt.ArrayLike
+    coeff: npt.NDArray[np.float64]
         Coefficients of the Fourier series with the new parametrization.
-    coeff_errors: npt.ArrayLike
+    coeff_errors: npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients with the new parametrization.
 
     """
@@ -179,10 +179,10 @@ def change_parametrization_fs_coeff(
 
 
 def change_parametrization_fs_cov_matrix(
-    cov_matrix: np.ndarray,
+    cov_matrix: npt.NDArray[np.float64],
     old_parametrization: str,
     new_parametrization: str,
-) -> np.ndarray:
+) -> npt.NDArray[np.float64]:
     """Permutation of the covariance matrix.
 
     Permute the covariance matrix of the Fourier series coefficients from the
@@ -293,7 +293,7 @@ def _check_coefficients_even(coeff: npt.NDArray) -> None:
 
     Parameters
     ----------
-    coeff : np.array
+    coeff : npt.NDArray
         Coefficients of the Fourier series.
 
     Raises
@@ -343,7 +343,7 @@ def _check_parametrization(parametrization: str) -> None:
         raise ValueError(msg % (parametrization, FOURIER_SERIES_PARAMETRIZATIONS))
 
 
-def _permutation_matrix_swap_adjacent(n: int) -> np.ndarray:
+def _permutation_matrix_swap_adjacent(n: int) -> npt.NDArray[np.float64]:
     p = np.zeros((n, n))
     p[range(0, n, 2), range(1, n, 2)] = 1  # Set 1s in even rows, odd columns
     p[range(1, n, 2), range(0, n, 2)] = 1  # Set 1s in odd rows, even columns
@@ -363,18 +363,18 @@ def _switch_cos_sin_and_sin_cos(
 
     Parameters
     ----------
-    coeff : npt.ArrayLike
+    coeff : npt.NDArray
         Coefficients of the Fourier series in the cos-sin or sin-cos form.
-    coeff_err : npt.ArrayLike
+    coeff_err : npt.NDArray
         Uncertainties of the Fourier series coefficients.
-    cov_matrix : np.array or None
+    cov_matrix : npt.NDArray or None
         Covariance matrix of the Fourier series coefficients. Default is None.
 
     Returns
     -------
-    new_coeff: npt.ArrayLike
+    new_coeff: npt.NDArray[np.float64]
         Coefficients of the Fourier series in the sin-cos or cos-sin form.
-    new_coeff_errors: npt.ArrayLike
+    new_coeff_errors: npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients.
 
 
@@ -420,18 +420,18 @@ def _change_cos_sin_to_amp_phase(
 
     Parameters
     ----------
-    coeff : npt.ArrayLike
+    coeff : npt.NDArray
         Coefficients of the Fourier series in the cos-sin form.
-    coeff_err : npt.ArrayLike
+    coeff_err : npt.NDArray
         Uncertainties of the Fourier series coefficients.
-    cov_matrix : np.ndarray or None
+    cov_matrix : npt.NDArray or None
         Covariance matrix of the Fourier series coefficients. Default is None.
 
     Returns
     -------
-    npt.ArrayLike
+    new_coeff: npt.NDArray
         Coefficients of the Fourier series in the amp-phase form.
-    np.ArrayLike
+    new_coeff_err: npt.NDArray
         Uncertainties of the Fourier series coefficients in the amp-phase form.
 
     """
@@ -464,7 +464,7 @@ def _change_cos_sin_to_amp_phase(
 def _change_amp_phase_to_cos_sin(
     coeff: npt.NDArray,
     coeff_err: npt.NDArray,
-    cov_matrix: np.ndarray | None = None,
+    cov_matrix: npt.NDArray | None = None,
 ) -> tuple[npt.NDArray, npt.NDArray]:
     """Change FS from amp-phase to cos-sin form.
 
@@ -482,9 +482,9 @@ def _change_amp_phase_to_cos_sin(
 
     Returns
     -------
-    new_coeff: npt.ArrayLike
+    new_coeff: npt.NDArray[np.float64]
         Coefficients of the Fourier series in the cos-sin form.
-    new_coeff_errors: npt.ArrayLike
+    new_coeff_errors: npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients in the cos-sin form.
 
     """
@@ -533,9 +533,9 @@ def _change_cos_sin_to_amp_phase_plus(
 
     Returns
     -------
-    npt.ArrayLike
+    new_coeff: npt.NDArray[np.float64]
         Coefficients of the Fourier series in the amp-phase form.
-    np.ArrayLike
+    new_coeff_err: npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients in the amp-phase form.
 
     """
@@ -567,18 +567,18 @@ def _change_amp_phase_plus_to_cos_sin(
 
     Parameters
     ----------
-    coeff : np.array
+    coeff : npt.NDArray[np.float64]
         Coefficients of the Fourier series in the cos-sin form.
-    coeff_err : np.array
+    coeff_err : npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients.
-    cov_matrix : np.array or None
+    cov_matrix : npt.NDArray[np.float64] or None
         Covariance matrix of the Fourier series coefficients. Default is None.
 
     Returns
     -------
-    npt.ArrayLike
+    new_coeff_err: npt.NDArray[np.float64]
         Coefficients of the Fourier series in the amp-phase+ form.
-    np.ArrayLike
+    new_coeff_err: npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients in the amp-phase form.
 
     """
@@ -607,16 +607,16 @@ def _change_cos_sin_to_exp(
 
     Parameters
     ----------
-    coeff : npt.ArrayLike
+    coeff : npt.NDArray[np.float64]
         Coefficients of the Fourier series in the cos-sin form.
-    coeff_err : npt.ArrayLike
+    coeff_err : npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients.
 
     Returns
     -------
-    npt.ArrayLike
+    new_coeff: npt.NDArray[np.float64]
         Coefficients of the Fourier series in the exp form.
-    np.ArrayLike
+    new_coeff_err: npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients in the exp form.
 
     Examples
@@ -666,16 +666,16 @@ def _change_exp_to_cos_sin(
 
     Parameters
     ----------
-    coeff : npt.ArrayLike
+    coeff : npt.NDArray[np.float64]
         Coefficients of the Fourier series in the exp form.
-    coeff_err : npt.ArrayLike
+    coeff_err : npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients.
 
     Returns
     -------
-    npt.ArrayLike
+    new_coeff: npt.NDArray[np.float64]
         Coefficients of the Fourier series in the cos-sin form.
-    np.ArrayLike
+    new_coeff_err: npt.NDArray[np.float64]
         Uncertainties of the Fourier series coefficients in the cos-sin form.
 
     """
