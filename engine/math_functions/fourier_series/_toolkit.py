@@ -10,7 +10,7 @@ from itertools import batched, permutations
 import numpy as np
 import numpy.typing as npt
 
-logger = logging.getLogger("pulsaria_engine.model.fs_toolkit")
+logger = logging.getLogger("engine.math_functions.fourier_series")
 
 FOURIER_SERIES_PARAMETRIZATIONS = [
     "cos-sin",

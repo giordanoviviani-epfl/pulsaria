@@ -14,7 +14,7 @@ import numpy as np
 import numpy.typing as npt
 
 import engine.config_utils as conf_util
-from engine.model.protocol_model import Model
+from engine.math_functions import MathFunction
 
 logger = logging.getLogger("pulsaria_engine.model.FitModel")
 
@@ -24,7 +24,7 @@ class FitModel:
 
     def __init__(
         self,
-        models: Model | list[Model],
+        models: MathFunction | list[MathFunction],
         operators: list[str] | None = None,
         common_metadata: dict[str, list[str]] | None = None,
     ) -> None:
@@ -32,7 +32,7 @@ class FitModel:
 
         Parameters
         ----------
-        models: list[Model]
+        models: list[MathFunction]
             List of models to be fitted to the data.
         operators: list[str] | None
             List of operators to be applied between the models.
@@ -43,7 +43,7 @@ class FitModel:
             of model identifiers as values.
 
         """
-        self.models = [models] if isinstance(models, Model) else models
+        self.models = [models] if isinstance(models, MathFunction) else models
         _check_models(self.models)
 
         self.operators_symbols = operators
@@ -66,7 +66,7 @@ class FitModel:
 
     @property
     def bool_single_model(self) -> bool:
-        """Boolean indicating if only one model is used."""
+        """Boolean indicating if only one MathFunction is used."""
         match self.numodels:
             case 1:
                 return True
@@ -78,7 +78,7 @@ class FitModel:
         """Necessary metadata for the models."""
         metadata = {}
         for model in self.models:
-            metadata[model.model_identifier] = model.necessary_metadata
+            metadata[model.identifier] = model.necessary_metadata
         return metadata
 
     @property
@@ -126,11 +126,11 @@ class FitModel:
             self.necessary_metadata,
         )
 
-        # Single Model
+        # Single MathFunction
         if self.bool_single_model:
             if metadata:
-                if self.models[0].model_identifier in metadata:
-                    metadata = metadata[self.models[0].model_identifier]
+                if self.models[0].identifier in metadata:
+                    metadata = metadata[self.models[0].identifier]
                 logger.debug("Metadata: %s", metadata)
                 return self.models[0].compute(x, **metadata)
             return self.models[0].compute(x)
@@ -139,7 +139,7 @@ class FitModel:
 
         results_list: list[float | npt.NDArray[np.float64]] = []
         for model in self.models:
-            model_id = model.model_identifier
+            model_id = model.identifier
             if metadata and model_id in metadata:
                 model_values = model.compute(x, **metadata[model_id])
             else:
@@ -219,7 +219,7 @@ class FitModelFactory:
 
     def configure(
         self,
-        models: list[Model],
+        models: list[MathFunction],
         operators: list[str],
         common_metadata: dict[str, list[str]] | None,
     ) -> None:
@@ -227,7 +227,7 @@ class FitModelFactory:
 
         Parameters
         ----------
-        models: list[Model]
+        models: list[MathFunction]
             List of models to be fitted to the data.
         operators: list[str]
             List of operators to be applied between the models.
@@ -287,7 +287,7 @@ class FitModelFactory:
             model_name = model.pop("model")
             class_model = conf_util.resolve(model_name)
             if not isinstance(class_model, type):
-                msg = "Model %s not found in the available models."
+                msg = "MathFunction %s not found in the available models."
                 logger.error(msg, model_name)
                 raise TypeError(msg % model_name)
             model_instance = class_model(**model)
@@ -345,22 +345,22 @@ class FitModelFactory:
 
 
 # Utility functions -------------------------------------------------------------------
-def _check_models(models: list[Model]) -> None:
-    """Check if models are subclasses of the Model class.
+def _check_models(models: list[MathFunction]) -> None:
+    """Check if models are subclasses of the MathFunction class.
 
     Parameters
     ----------
-    models: list[Model]
+    models: list[MathFunction]
         List of models to be fitted to the data.
 
     Raises
     ------
     TypeError
-        If the models list is not a list of Model instances.
+        If the models list is not a list of MathFunction instances.
 
     """
-    if not all(isinstance(model, Model) for model in models):
-        msg = "Models must be a list of Model instances."
+    if not all(isinstance(model, MathFunction) for model in models):
+        msg = "Models must be a list of MathFunction instances."
         logger.error(msg)
         raise TypeError(msg)
 
@@ -427,14 +427,14 @@ def _get_operators(
 
 
 def _check_number_operators(
-    models: list[Model],
+    models: list[MathFunction],
     operators: list[Callable[[Any, Any], Any]] | None,
 ) -> None:
     """Check if the number of operators is correct for the given number of models.
 
     Parameters
     ----------
-    models: list[Model]
+    models: list[MathFunction]
         List of models to be fitted to the data.
     operators: list[Callable[[Any, Any], Any]]
         List of operators to be applied between the models.
@@ -479,13 +479,13 @@ def _set_models_as_attr(obj: FitModel) -> None:
     logger.debug("Setting Models as attributes...")
     for model in obj.models:
         setattr(obj, model.__class__.__name__, model)
-        setattr(obj, model.model_identifier, model)
+        setattr(obj, model.identifier, model)
     logger.info("Models set as attributes.")
 
 
 def _check_keys_subset_models_ids(
     keys: list[str],
-    models: list[Model],
+    models: list[MathFunction],
 ) -> None:
     """Check if the keys are model identifiers.
 
@@ -493,7 +493,7 @@ def _check_keys_subset_models_ids(
     ----------
     keys: list[str]
         List of keys to be checked.
-    models: list[Model]
+    models: list[MathFunction]
         List of models to be fitted to the data.
 
     Raises
@@ -502,14 +502,14 @@ def _check_keys_subset_models_ids(
         If the keys are not the model identifiers.
 
     """
-    if not set(keys).issubset({model.model_identifier for model in models}):
+    if not set(keys).issubset({model.identifier for model in models}):
         msg = "Keys must be the model identifiers."
         logger.error(msg)
         raise ValueError(msg)
 
 
 def _check_common_metadata(
-    models: list[Model],
+    models: list[MathFunction],
     necessary_metadata: dict[str, list[str]],
     common_metadata: dict[str, list[str]] | None,
 ) -> None:
@@ -520,7 +520,7 @@ def _check_common_metadata(
 
     Parameters
     ----------
-    models : list[Model]
+    models : list[MathFunction]
         List of Models.
     necessary_metadata : dict[str, list[str]]
         Necessary metadata for the models.
@@ -564,7 +564,7 @@ def _check_common_metadata(
 def _setup_metadata_for_compute(
     metadata: dict[str, dict[str, Any]],
     common_metadata: dict[str, list[str]] | None,
-    models: list[Model],
+    models: list[MathFunction],
     necessary_metadata: dict[str, list[str]],
 ) -> dict[str, Any]:
     """Set the metadata for the compute method.
@@ -578,7 +578,7 @@ def _setup_metadata_for_compute(
         Input metadata to be checked and broadcasted.
     common_metadata : dict[str, list[str]] | None
         Common metadata shared among models.
-    models : list[Model]
+    models : list[MathFunction]
         List of models.
     necessary_metadata : dict[str, list[str]]
         Necessary metadata for the models.
@@ -627,7 +627,7 @@ def _setup_metadata_for_compute(
 def _broadcast_metadata_to_common_metadata(
     metadata: dict[str, dict[str, Any]],
     common_metadata: dict[str, list[str]],
-    models: list[Model],
+    models: list[MathFunction],
 ) -> dict[str, dict[str, Any]]:
     """Check and broadcast the specified metadata to all models that share it.
 
@@ -637,7 +637,7 @@ def _broadcast_metadata_to_common_metadata(
         Input metadata to be checked and broadcasted.
     common_metadata : dict[str, list[str]]
         Common metadata shared among models.
-    models : list[Model]
+    models : list[MathFunction]
         List of models.
 
     Returns
@@ -670,8 +670,7 @@ def _broadcast_metadata_to_common_metadata(
                     getattr(model, key)
                     for model_id in common_model_ids
                     for model in models
-                    if model_id == model.model_identifier
-                    and getattr(model, key) is not None
+                    if model_id == model.identifier and getattr(model, key) is not None
                 ]
 
                 empty_list = not values

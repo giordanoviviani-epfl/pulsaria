@@ -11,8 +11,9 @@ sys.path.append(str(Path(__file__).parent))
 import measurements
 import model
 from logging_setup import configure_logging
+from math_functions import ConstantFunction, FourierSeries
 from measurements import MeasurementsReader
-from model import FitModel, FitModelFactory, FourierSeries, Offset
+from model import FitModel, FitModelFactory
 
 
 def is_notebook() -> bool:
@@ -41,5 +42,5 @@ __all__ = [
     "FourierSeries",
     "FitModel",
     "FitModelFactory",
-    "Offset",
+    "ConstantFunction",
 ]

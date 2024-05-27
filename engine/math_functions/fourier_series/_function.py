@@ -1,7 +1,7 @@
-"""Fourier Series Model.
+"""Fourier Series.
 
 In this module, the FourierSeries class is defined. This class is a subclass
-of the Model class and represents a Fourier series model.
+(follows protocol) of MathFunction and it represents a Fourier series model.
 """
 
 import logging
@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 
-from engine.model.fourier_series_toolkit import (
+from engine.math_functions.fourier_series._toolkit import (
     FOURIER_SERIES_PARAMETRIZATIONS,
     change_parametrization_fs_coeff,
     change_parametrization_fs_cov_matrix,
@@ -18,7 +18,7 @@ from engine.model.fourier_series_toolkit import (
     fourier_series,
 )
 
-logger = logging.getLogger("pulsaria_engine.model.FourierSeries")
+logger = logging.getLogger("engine.math_functions.fourier_series")
 
 
 class FourierSeries:
@@ -36,7 +36,7 @@ class FourierSeries:
         metadata: dict[Any, Any] | None = None,
     ) -> None:
         """Initialize the Fourier series model."""
-        self.model_identifier = "FS"
+        self.identifier = "FS"
         self.necessary_metadata = ["P", "E"]
         self.computing_function = fourier_series
         self.bool_parametrization = True
@@ -207,7 +207,7 @@ class FourierSeries:
             logger.error(msg, E, P)
             raise ValueError(msg % (E, P))
 
-        return np.subtract(x, E) / P % 1.0
+        return np.remainder(np.subtract(x, E) / P, 1.0)
 
     def change_parametrization(self, new_parametrization: str) -> None:
         """Change the parametrization of the coefficients.

@@ -1,7 +1,7 @@
-"""Model abstract class.
+"""Protocol for mathematical function.
 
-This module contains the abstract class Model, which is the base class for all
-models in the Pulsaria Engine.
+This module contains the protocol MathFunction, which is the base class for all
+mathematical expression of models in pulsaria's engine.
 """
 
 from collections.abc import Callable
@@ -12,14 +12,14 @@ import numpy.typing as npt
 
 
 @runtime_checkable
-class Model(Protocol):
-    """Abstract class for models in the Pulsaria Engine.
+class MathFunction(Protocol):
+    """Abstract class for mathematical functions.
 
-    This class is the base class for all models in the Pulsaria Engine. It
-    defines the interface that all models must implement.
+    This class is the base class for mathematical functions. It
+    defines the interface that all math function must implement.
     """
 
-    model_identifier: str
+    identifier: str
     necessary_metadata: list
     computing_function: Callable
     bool_parametrization: bool
@@ -41,17 +41,17 @@ class Model(Protocol):
         self,
         x: float | npt.NDArray[np.float64],
     ) -> float | npt.NDArray[np.float64]:
-        """Compute the model.
+        """Compute the function for a given input.
 
-        This method computes the model for the given input arguments. It should
+        This method computes the function for the given input arguments. It should
         be implemented by all subclasses.
         """
         ...
 
     def formula(self) -> str:
-        """Return the formula of the model.
+        """Return the expression of the mathematical function.
 
-        This method returns the formula of the model. It should be implemented
+        This method returns the mathematical expression. It should be implemented
         by all subclasses.
         """
         ...
