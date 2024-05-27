@@ -160,6 +160,29 @@ class FitModel:
 
         return result
 
+    def formula(self) -> str:
+        """Return the formula of the model.
+
+        Returns
+        -------
+        str
+            Formula of the model.
+
+        """
+        if self.numodels == 1:
+            return self.models[0].formula()
+
+        formula = ""
+        if self.operators_symbols is None:
+            msg = "Operators is None but more than one model is used."
+            raise ValueError(msg)
+        for i, model in enumerate(self.models):
+            if i == 0:
+                formula += model.formula()
+            else:
+                formula += f" {self.operators_symbols[i - 1]} {model.formula()}"
+        return formula
+
 
 class FitModelFactory:
     """FitModelFactory class.
@@ -313,7 +336,7 @@ class FitModelFactory:
         """
         if self.models is None:
             if self.bool_configured:
-                msg = "FitModelFactory object is configured but models is None."
+                msg = "FitModelFactory object is configured but models is empty."
             else:
                 msg = "FitModelFactory object not configured."
             logger.error(msg)
@@ -699,6 +722,7 @@ def _broadcast_metadata_to_common_metadata(
     return metadata
 
 
+# Exceptions --------------------------------------------------------------------------
 class MetadataError(Exception):
     """MetadataError class."""
 
