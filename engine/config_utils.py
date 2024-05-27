@@ -1,7 +1,13 @@
 """Module for configuration utilities."""
 
+import logging
 from collections.abc import Callable
+from pathlib import Path
 from types import ModuleType
+
+import yaml
+
+logger = logging.getLogger("engine.config_utils")
 
 
 def resolve(name: str) -> ModuleType | type | Callable | object:
@@ -30,3 +36,58 @@ def resolve(name: str) -> ModuleType | type | Callable | object:
             found = globals()[n] if i == 0 else getattr(found, n)
 
     return found
+
+
+# Read files --------------------------------------------------------------------------
+def check_file_exists(file: str | Path) -> None:
+    """Check if a file exists or raise an exception.
+
+    Parameters
+    ----------
+    file : str or Path
+        Path to the file.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file does not exist.
+
+    """
+    file = Path(file)
+    if not file.exists():
+        message = f"File {file} does not exist."
+        logger.error(message)
+        raise FileNotFoundError(message)
+
+
+def read_yaml(file: str | Path) -> dict:
+    """Read data from a yaml file.
+
+    Parameters
+    ----------
+    file : str or Path
+        Path to the yaml file.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the data from the yaml file.
+
+    """
+    check_file_exists(file)
+
+    with Path(file).open("r") as f:
+        try:
+            data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            logger.exception(
+                "Error reading data from: %s",
+                file,
+                extra={
+                    "exception": e,
+                },
+            )
+            raise
+
+    logger.info("Successfully read data from: %s", file)
+    return data

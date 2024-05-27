@@ -5,7 +5,8 @@ from typing import Any
 
 import pandas as pd
 
-import engine.measurements.read_filter_data_funcs as rfdf
+import engine.datasets_utils._read_fits as read_fits
+from engine.datasets_utils._filters import filter_by_header, filter_by_queries
 from engine.paths_reference import pulsaria_path
 
 logger = logging.getLogger("engine.data_handling.veloce_dr1")
@@ -52,9 +53,9 @@ def read_target_rv(
     rename_columns = {key: key.lower() for key in all_columns}
 
     # HEADER
-    header = rfdf.fits_get_header(file)
+    header = read_fits.get_header(file)
     # Filter target based on header keys
-    if not rfdf.filter_from_header(header, header_filters):
+    if not filter_by_header(header, header_filters):
         return {}, pd.DataFrame()
 
     header_to_return = (
@@ -62,10 +63,10 @@ def read_target_rv(
     )
 
     # DATA
-    data = rfdf.fits_get_dataframe(file, hdu=1, columns=all_columns)
+    data = read_fits.get_table(file, hdu=1, columns=all_columns)
     rename_data = data.rename(columns=rename_columns)
     # Filter the data based on the filters
-    filtered_data = rfdf.filter_from_queries(rename_data, filters)
+    filtered_data = filter_by_queries(rename_data, filters)
     filtered_data = filtered_data if filtered_data is not None else pd.DataFrame()
     if not filtered_data.empty:
         filtered_data["target"] = target

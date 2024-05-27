@@ -14,7 +14,6 @@ import numpy as np
 import numpy.typing as npt
 
 import engine.config_utils as conf_util
-import engine.measurements.read_filter_data_funcs as rfdf
 from engine.model.protocol_model import Model
 
 logger = logging.getLogger("pulsaria_engine.model.FitModel")
@@ -262,7 +261,7 @@ class FitModelFactory:
 
         """
         self._config_file = config_file
-        config = rfdf.yaml_get_data(config_file)
+        config = conf_util.read_yaml(config_file)
 
         # Check method is implemented
         if method not in config:

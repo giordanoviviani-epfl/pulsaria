@@ -9,10 +9,9 @@ import numpy as np
 import pandas as pd
 
 import engine.config_utils as conf_util
-import engine.measurements.read_filter_data_funcs as rfdf
-from engine.measurements.class_measurements import Measurements
+from engine.measurements.measurements import Measurements
 
-logger = logging.getLogger("pulsaria_engine.data_handling")
+logger = logging.getLogger("engine.measurements")
 
 
 class MeasurementsReader:
@@ -42,7 +41,7 @@ class MeasurementsReader:
         """
         # Read configuration file
         self.config_file = config_file
-        self.config = rfdf.yaml_get_data(config_file)
+        self.config = conf_util.read_yaml(config_file)
 
         # Check method is implemented
         if method not in self.config:
