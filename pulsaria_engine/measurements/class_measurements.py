@@ -9,6 +9,6 @@ import pandas as pd
 class Measurements:
     """Class to store the measurements of a dataset."""
 
-    meta: dict
+    metadata: dict
     data: pd.DataFrame
     multi_target: bool = False

@@ -110,7 +110,7 @@ class MeasurementsReader:
         logger.warning("Dataframe is empty") if data_all.empty else None
         logger.warning("Header is empty") if not header_all else None
         return Measurements(
-            meta=header_all,
+            metadata=header_all,
             data=data_all,
             multi_target=multiple_targets,
         )
