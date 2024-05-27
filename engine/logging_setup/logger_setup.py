@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import override
 
 import yaml
-from path_config import pulsaria_path
+
+from engine.paths_reference import pulsaria_path
 
 LOG_RECORD_BUILTIN_ATTRS = {
     "args",

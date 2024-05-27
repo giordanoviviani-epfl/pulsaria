@@ -55,6 +55,6 @@ skip-magic-trailing-comma = false
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 # Flake8 is 15 - which I feel is too high
 max-complexity = 10
