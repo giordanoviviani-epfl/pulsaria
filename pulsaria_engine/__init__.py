@@ -12,7 +12,7 @@ import measurements
 import model
 from logging_setup import configure_logging
 from measurements import MeasurementsReader
-from model import FitModel, FitModelFactory, FourierSeries
+from model import FitModel, FitModelFactory, FourierSeries, Offset
 
 
 def is_notebook() -> bool:
@@ -41,4 +41,5 @@ __all__ = [
     "FourierSeries",
     "FitModel",
     "FitModelFactory",
+    "Offset",
 ]

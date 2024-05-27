@@ -130,6 +130,10 @@ class FourierSeries:
             The values of the Fourier series model.
 
         """
+        if self.coefficients is None:
+            msg = "The coefficients of the Fourier series model are not defined."
+            logger.error(msg)
+            raise ValueError(msg)
         return self.computing_function(
             self.coefficients,
             x,

@@ -7,6 +7,7 @@ import logging
 import logging.config
 import logging.handlers
 import os
+from logging.handlers import QueueHandler
 from pathlib import Path
 from typing import override
 
@@ -129,9 +130,9 @@ def configure_logging() -> None:
 
     logging.config.dictConfig(config)
     queue_handler = logging.getHandlerByName("queue_handler")
-    if queue_handler is not None:
-        queue_handler.listener.start()
-        atexit.register(queue_handler.listener.stop)
+    if isinstance(queue_handler, QueueHandler):
+        queue_handler.listener.start()  # type: ignore[error-code]
+        atexit.register(queue_handler.listener.stop)  # type: ignore[error-code]
 
     for logger_name in DISABLED_LOGGERS:
         logging.getLogger(logger_name).setLevel(logging.WARNING)
