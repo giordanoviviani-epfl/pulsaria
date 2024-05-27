@@ -13,9 +13,9 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 
-import pulsaria_engine.config_utils as conf_util
-import pulsaria_engine.measurements.read_filter_data_funcs as rfdf
-from pulsaria_engine.model.protocol_model import Model
+import engine.config_utils as conf_util
+import engine.measurements.read_filter_data_funcs as rfdf
+from engine.model.protocol_model import Model
 
 logger = logging.getLogger("pulsaria_engine.model.FitModel")
 

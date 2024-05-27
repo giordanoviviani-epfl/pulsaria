@@ -8,10 +8,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-import pulsaria_engine.config_utils as conf_util
-import pulsaria_engine.measurements.read_filter_data_funcs as rfdf
-from pulsaria_engine.measurements.class_measurements import Measurements
-from pulsaria_engine.path_config import pulsaria_path
+import engine.config_utils as conf_util
+import engine.measurements.read_filter_data_funcs as rfdf
+from engine.measurements.class_measurements import Measurements
+from engine.path_config import pulsaria_path
 
 logger = logging.getLogger("pulsaria_engine.data_handling")
 

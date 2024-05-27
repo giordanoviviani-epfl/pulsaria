@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 
-from pulsaria_engine.model.fourier_series_toolkit import (
+from engine.model.fourier_series_toolkit import (
     FOURIER_SERIES_PARAMETRIZATIONS,
     change_parametrization_fs_coeff,
     change_parametrization_fs_cov_matrix,
