@@ -38,7 +38,6 @@ def resolve(name: str) -> ModuleType | type | Callable | object:
     return found
 
 
-# Read files --------------------------------------------------------------------------
 def check_file_exists(file: str | Path) -> None:
     """Check if a file exists or raise an exception.
 
