@@ -112,7 +112,7 @@ class Model:
         for id_letter, submodel in zip(ascii_lowercase, self.submodels, strict=False):
             result_dict[id_letter] = submodel.compute(x, **computing_meta[submodel.id_])
 
-        return ne.evaluate(self.math_expression, local_dict=result_dict)
+        return ne.evaluate(self.math_expression, local_dict=result_dict, global_dict={})
 
     def formula(self) -> str:
         """Return the mathematical expression of the Model.

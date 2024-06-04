@@ -16,7 +16,7 @@ def read_target_rv(
     target: str,
     header_keys: list[str] | None = None,
     columns: list[str] | None = None,
-    header_filters: dict | None = None,
+    header_filters: list | None = None,
     filters: dict | None = None,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
     """Read the RV data for a target from the Veloce DR1 dataset.
