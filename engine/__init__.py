@@ -11,9 +11,9 @@ sys.path.append(str(Path(__file__).parent))
 import measurements
 import model
 from logging_setup import configure_logging
-from math_functions import ConstantFunction, FourierSeries
+from math_functions import ConstantFunction, FourierSeries, MathFunction
 from measurements import MeasurementsReader
-from model import FitModel, FitModelFactory
+from model import Model, ModelFactory
 
 
 def is_notebook() -> bool:
@@ -34,13 +34,16 @@ if is_notebook():
     logger.info("Running in a Jupyter notebook.")
 else:
     logger.info("Running in a Python script or shell.")
+
+
 __all__ = [
     "logger",
     "measurements",
     "MeasurementsReader",
     "model",
-    "FourierSeries",
-    "FitModel",
-    "FitModelFactory",
     "ConstantFunction",
+    "FourierSeries",
+    "MathFunction",
+    "Model",
+    "ModelFactory",
 ]
