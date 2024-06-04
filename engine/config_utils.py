@@ -90,3 +90,24 @@ def read_yaml(file: str | Path) -> dict:
 
     logger.info("Successfully read data from: %s", file)
     return data
+
+
+# Exception ---------------------------------------------------------------------------
+class ConfigError(Exception):
+    """Exception raised for errors in the configuration data."""
+
+    def __init__(self, config: dict, extra: dict | None = None) -> None:
+        """Exception raised for errors in the configuration data.
+
+        Parameters
+        ----------
+        config : dict
+            Configuration dict used.
+        extra : dict | None, optional
+            Extra information about the error. Default is None.
+
+        """
+        self.extra = extra or {}
+        self.extra.update({"config": config})
+        logger.error("Configuration error.", extra=self.extra)
+        super().__init__(self.extra)
