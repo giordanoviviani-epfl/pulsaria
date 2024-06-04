@@ -19,14 +19,14 @@ class MathFunction(Protocol):
     defines the interface that all math function must implement.
     """
 
-    identifier: str
-    necessary_metadata: list
-    computing_function: Callable
-    bool_parametrization: bool
-    parametrization: str
-    coefficients: float | npt.NDArray
-    coefficients_errors: float | npt.NDArray
-    metadata: dict
+    id_: str
+    required_meta: list
+    compute_func: Callable
+    has_param: bool
+    param_form: str
+    coeffs: npt.NDArray
+    coeffs_err: npt.NDArray
+    meta: dict
 
     # Abstract methods ----------------------------------------------------------------
     # def __init__(self) -> None:

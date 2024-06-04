@@ -26,24 +26,24 @@ class ConstantFunction:
         metadata: dict[Any, Any] | None = None,
     ) -> None:
         """Initialize ConstantFunction."""
-        self.identifier = "offset"
-        self.necessary_metadata = []
-        self.computing_function = constant_function
-        self.bool_parametrization = False
-        self.parametrization = "None"
-        self.coefficients = offset
-        self.coefficients_errors = offset_err
-        self.metadata = metadata or {}
+        self.id_ = "offset"
+        self.required_meta = []
+        self.compute_func = constant_function
+        self.has_param = False
+        self.param_form = "None"
+        self.coeffs = np.array(offset)
+        self.coeffs_err = np.array(offset_err)
+        self.meta = metadata or {}
 
     @property
     def offset(self) -> float | npt.NDArray[np.float64] | None:
         """Return the offset value."""
-        return self.coefficients
+        return self.coeffs
 
     @property
     def offset_error(self) -> float | npt.NDArray[np.float64] | None:
         """Return the offset error."""
-        return self.coefficients_errors
+        return self.coeffs_err
 
     def compute(
         self,
@@ -57,11 +57,11 @@ class ConstantFunction:
             Input value/s.
 
         """
-        if self.coefficients is None:
+        if self.coeffs is None:
             msg = "constant value is None."
             logger.error(msg)
             raise ValueError(msg)
-        return self.computing_function(self.coefficients, x)
+        return self.compute_func(self.coeffs, x)
 
     def formula(self) -> str:
         """Constant formula."""

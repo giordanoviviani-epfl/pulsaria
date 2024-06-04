@@ -36,25 +36,43 @@ class FourierSeries:
         metadata: dict[Any, Any] | None = None,
     ) -> None:
         """Initialize the Fourier series model."""
-        self.identifier = "FS"
-        self.necessary_metadata = ["P", "E"]
-        self.computing_function = fourier_series
-        self.bool_parametrization = True
-        self.parametrization = parametrization
-        self.coefficients = coeff or np.array([], dtype=np.float64)
-        self.coefficients_errors = coeff_err or np.array([], dtype=np.float64)
-        self.metadata = metadata if metadata is not None else {}
+        self.id_ = "FS"
+        self.required_meta = ["P", "E"]
+        self.compute_func = fourier_series
+        self.has_param = True
+        self.param_form = parametrization
+        self.coeffs = coeff or np.array([], dtype=np.float64)
+        self.coeffs_err = coeff_err or np.array([], dtype=np.float64)
+        self.meta = metadata if metadata is not None else {}
 
         self._memory: dict | None = None
-        self.possible_parametrizations = FOURIER_SERIES_PARAMETRIZATIONS
-        self.P: float | None = self.metadata.get("P", None)
-        self.E: float | None = self.metadata.get("E", None)
+        self.param_variants = FOURIER_SERIES_PARAMETRIZATIONS
 
     # Properties ----------------------------------------------------------------------
     @property
     def n_harmonics(self) -> int:
         """Return the number of harmonics in the Fourier series."""
-        return len(np.asarray(self.coefficients)) // 2
+        return len(np.asarray(self.coeffs)) // 2
+
+    @property
+    def P(self) -> float | None:  # noqa: N802
+        """Return the pulsation period."""
+        return self.meta.get("P", None)
+
+    @P.setter
+    def P(self, value: float | None) -> None:  # noqa: N802
+        """Set the pulsation period."""
+        self.meta["P"] = value
+
+    @property
+    def E(self) -> float | None:  # noqa: N802
+        """Return the epoch."""
+        return self.meta.get("E", None)
+
+    @E.setter
+    def E(self, value: float | None) -> None:  # noqa: N802
+        """Set the epoch."""
+        self.meta["E"] = value
 
     # Required methods ----------------------------------------------------------------
     def compute(
@@ -130,14 +148,14 @@ class FourierSeries:
             The values of the Fourier series model.
 
         """
-        if self.coefficients is None:
+        if self.coeffs is None:
             msg = "The coefficients of the Fourier series model are not defined."
             logger.error(msg)
             raise ValueError(msg)
-        return self.computing_function(
-            self.coefficients,
+        return self.compute_func(
+            self.coeffs,
             x,
-            self.parametrization,
+            self.param_form,
             n_harmonics,
         )
 
@@ -170,14 +188,8 @@ class FourierSeries:
         phase = self.calculate_phase(x, P, E)
         return self.compute_at_phase(phase, n_harmonics)
 
-    def formula(self, n_harmonics: int | str | None = None) -> str:
+    def formula(self) -> str:
         """Return the formula of the Fourier series model.
-
-        Parameters
-        ----------
-        n_harmonics : int | str | None
-            Number of harmonics to consider. If None, the formula will use the
-            number of harmonics of the model.
 
         Returns
         -------
@@ -185,11 +197,10 @@ class FourierSeries:
             The formula of the Fourier series model.
 
         """
-        if n_harmonics is None:
-            n_harmonics = self.n_harmonics
-            if n_harmonics == 0:
-                n_harmonics = "N"
-        return formula_fourier_series(self.parametrization, n_harmonics)
+        n_harmonics = self.n_harmonics
+        if n_harmonics == 0:
+            n_harmonics = "N"
+        return formula_fourier_series(self.param_form, n_harmonics)
 
     # Specific methods ----------------------------------------------------------------
     def calculate_phase(
@@ -219,30 +230,27 @@ class FourierSeries:
 
         """
         cov_matrix = None
-        if (
-            "cov_matrix" in self.metadata
-            and self.parametrization in self.metadata["cov_matrix"]
-        ):
-            cov_matrix = self.metadata["cov_matrix"][self.parametrization]
+        if "cov_matrix" in self.meta and self.param_form in self.meta["cov_matrix"]:
+            cov_matrix = self.meta["cov_matrix"][self.param_form]
             try:
                 new_cov_matrix = change_parametrization_fs_cov_matrix(
                     cov_matrix,
-                    self.parametrization,
+                    self.param_form,
                     new_parametrization,
                 )
-                self.metadata["cov_matrix"][new_parametrization] = new_cov_matrix
+                self.meta["cov_matrix"][new_parametrization] = new_cov_matrix
             except NotImplementedError:
                 msg = "Covariance matrix transformation %s -> %s is not implemented."
-                logger.info(msg, self.parametrization, new_parametrization)
+                logger.info(msg, self.param_form, new_parametrization)
                 new_cov_matrix = None
 
         new_param_values = change_parametrization_fs_coeff(
-            self.coefficients,
-            self.coefficients_errors,
-            self.parametrization,
+            self.coeffs,
+            self.coeffs_err,
+            self.param_form,
             new_parametrization,
             cov_matrix,
         )
-        self.coefficients = new_param_values[0]
-        self.coefficients_errors = new_param_values[1]
-        self.parametrization = new_parametrization
+        self.coeffs = new_param_values[0]
+        self.coeffs_err = new_param_values[1]
+        self.param_form = new_parametrization
